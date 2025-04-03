@@ -1,0 +1,14 @@
+{
+  "packages": [
+    {
+      "name": "vector",
+      "finder": {
+        "type": "regex",
+        "path": "ecu/xpad/ara/vector/tools/amsr_generators/amsr_generators.bzl",
+        "pattern": "CC_VULCAN_AMSR, \"/generators/Vector_r(.*)\",)",
+        "prefix": "https://ddad.artifactory.cc.bmwgroup.net/artifactory/generators/Vector_r",
+        "hash_pattern": "sha256 = \"(\\w+)\",$"
+      }
+    }
+  ]
+}
