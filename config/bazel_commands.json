@@ -1,0 +1,18 @@
+{
+  "commands": [
+    [
+      "bazel",
+      "build",
+      "--config=dbg",
+      "--config=asan",
+      "--config=tsan",
+      "--config=ubsan",
+      "--config=coverage",
+      "--config=gcov",
+      "--config=clang-tidy",
+      "--config=clang-tidy-verbose",
+      "--config=clang-tidy-verbose-quiet",
+      "--no-build"
+    ]
+  ]
+}

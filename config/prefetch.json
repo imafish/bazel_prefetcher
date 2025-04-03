@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "name": "vector",
+      "hash_matcher": {
+        "type": "regex",
+        "file": "bazel.bzl",
+        "anchor": "pattern",
+        "regex": "sha256 = \"(\\w+)\",$",
+        "format": "%s",
+        "max_lines": 4
+      },
+      "url_matcher": {
+        "type": "regex",
+        "file": "bazel.bzl",
+        "regex": "example.com/vector_r(.*)\"\\),",
+        "format": "https://example.com/artifactory/Vector_r%s"
+      }
+    },
+    {
+      "name": "cargo-1.84.1-x86_64-unknown-linux-gnu.tar.xz",
+      "url_matcher": {
+        "type": "hardcoded",
+        "format": "https://example.net/artifactory/cargo-1.84.1-x86_64-unknown-linux-gnu.tar.xz"
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.1">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>690</x>
+      <y>70</y>
+      <w>50</w>
+      <h>870</h>
+    </coordinates>
+    <panel_attributes>m1=0..n</panel_attributes>
+    <additional_attributes>10.0;850.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>200</x>
+      <y>130</y>
+      <w>470</w>
+      <h>270</h>
+    </coordinates>
+    <panel_attributes>Server:
+--
+- Fetch sources
+	* per request
+	* from config.json
+
+- Analyze dependencies
+ 	* from config.json
+ 	* using bazel
+
+- Download package
+	* use downloader, retry
+
+- Schedule
+
+- Clean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>200</x>
+      <y>450</y>
+      <w>470</w>
+      <h>380</h>
+    </coordinates>
+    <panel_attributes>Server API:
+
+--
+
+1. Request fetch
+2. Query fetch
+3. Request package
+4. Download server (readonly)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>740</x>
+      <y>130</y>
+      <w>560</w>
+      <h>420</h>
+    </coordinates>
+    <panel_attributes>Client
+
+--
+
+1. communicate to server
+2. download package and put to cache
+3. Analyze repo, fetch packages from server
+4. Analyze repo, request packages from server</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

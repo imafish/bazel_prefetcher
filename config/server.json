@@ -1,0 +1,48 @@
+{
+  "server": {
+    "port": 7777,
+    "host": "localhost",
+    "timeout": 300,
+    "downloader": "aria2",
+    "workdir": "$home/workspace_bazel_prefetcher",
+    "scheduler": {
+      "interval": 3600,
+      "start_time": "18:00",
+      "end_time": "18:00"
+    },
+    "cleanup": {
+      "enabled": true,
+      "max_size": 256000000000,
+      "tolerant_size": 128000000000,
+      "max_age": 30
+    }
+  },
+  "downloaders": [
+    {
+      "name": "aria2",
+      "cmd": "aria2c",
+      "default_args": [
+        "-x",
+        "6",
+        "-s",
+        "24",
+        "--min-split-size=1M",
+        "-o",
+        "$out",
+        "$url"
+      ],
+      "args": [
+        {
+          "matcher": {
+            "type": "url",
+            "pattern": "^https?://example\\.net"
+          },
+          "args": [
+            "--http-user=user",
+            "--http-passwd=12345, or, use .netrc"
+          ]
+        }
+      ]
+    }
+  ]
+}
