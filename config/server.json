@@ -6,25 +6,26 @@
     "downloader": "aria2",
     "workdir": "$home/workspace_bazel_prefetcher"
   },
-  "downloader": {
-    "name": "aria2",
-    "cmd": "aria2c",
-    "pattern": "$cmd $args $url -o $out",
-    "default_args": [
-      "--max-connection-per-server=4",
-      "-x 6 -s 24",
-      "--min-split-size=1M"
-    ],
-    "args": [
-      {
-        "matcher": {
-          "type": "url",
-          "pattern": "^https?://ddad\\.artifactory\\.cc\\.bmwgroup\\.net"
-        },
-        "args": [
-          "--username=hankguo --password=123456"
-        ]
-      }
-    ]
-  }
+  "downloaders": [
+    {
+      "name": "aria2",
+      "pattern": "aria2c $args $url -o $out",
+      "default_args": [
+        "--max-connection-per-server=4",
+        "-x 6 -s 24",
+        "--min-split-size=1M"
+      ],
+      "args": [
+        {
+          "matcher": {
+            "type": "url",
+            "pattern": "^https?://ddad\\.artifactory\\.cc\\.bmwgroup\\.net"
+          },
+          "args": [
+            "--username=hankguo --password=123456"
+          ]
+        }
+      ]
+    }
+  ]
 }

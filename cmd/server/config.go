@@ -16,7 +16,6 @@ type ServerConfig struct {
 	} `json:"server"`
 	Downloader struct {
 		Name        string   `json:"name"`
-		Cmd         string   `json:"cmd"`
 		Pattern     string   `json:"pattern"`
 		DefaultArgs []string `json:"default_args"`
 		Args        []struct {

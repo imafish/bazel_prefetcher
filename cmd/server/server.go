@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"strings"
 
 	"internal/git"
@@ -27,15 +28,29 @@ func main() {
 	// replace $home with the actual home directory in serverConfig
 	serverConfig.Server.Workdir = strings.ReplaceAll(serverConfig.Server.Workdir, "$home", os.Getenv("HOME"))
 
+	process(serverConfig, prefetchConfig)
 	updateGit(serverConfig)
+}
+
+func process(config *ServerConfig, prefetchConfig *PrefetchConfig) {
+	// Example function to process the server and prefetch configurations
+	log.Println("Processing server and prefetch configurations...")
+	log.Printf("Server Workdir: %s\n", config.Server.Workdir)
+	log.Printf("Downloader Name: %s\n", config.Downloader.Name)
+	log.Printf("Prefetch Packages: %+v\n", prefetchConfig.Packages)
+
+	log.Printf("updating git repository.")
+	updateGit(config)
+	log.Println("updating git completed.")
 }
 
 func updateGit(config *ServerConfig) error {
 	// Example function to update git repository
-	log.Println("Updating git repository at:", config.Server.Workdir)
+	gitDir := path.Join(config.Server.Workdir, "src")
+	log.Println("Updating git repository at:", gitDir)
 
 	git := git.GitRunner{
-		RepoPath: config.Server.Workdir,
+		RepoPath: gitDir,
 	}
 
 	err := git.UpdateRepository()
