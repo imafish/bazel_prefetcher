@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"internal/common"
 	"internal/db"
@@ -86,6 +87,7 @@ func logServerConfig(config *common.ServerConfig) {
 }
 
 func process(config *common.ServerConfig, prefetchers []prefetcher.PrefetchMatchers) {
+	start := time.Now()
 	common.LogSeparator("updating git")
 	updateGit(config)
 
@@ -98,23 +100,33 @@ func process(config *common.ServerConfig, prefetchers []prefetcher.PrefetchMatch
 	log.Printf("Analyzed prefetch items: %+v\n", len(items))
 
 	common.LogSeparator("downloading and saving to data folder...")
-	processPrefetchItems(config, items)
+	successful := processPrefetchItems(config, items)
 
+	end := time.Now()
 	common.LogSeparator("debug print item table")
 	config.ItemTable.DebugPrintAll()
+	common.LogSeparator("summary")
+	log.Printf("Total items: %d, Successful: %d, Time taken: %s", len(items), successful, end.Sub(start))
 }
 
-func processPrefetchItems(config *common.ServerConfig, items []*prefetcher.PrefetchItem) {
+func processPrefetchItems(config *common.ServerConfig, items []*prefetcher.PrefetchItem) int {
 	downloadDir := path.Join(config.Server.Workdir, "downloads")
 	if err := os.MkdirAll(downloadDir, os.ModePerm); err != nil {
 		log.Printf("ERROR: Failed to create download directory: %v", err)
-		return
+		return 0
 	}
 
+	successful := 0
 	for _, item := range items {
 		common.LogSeparator(item.Url)
-		processOneItem(config, item, downloadDir)
+		err := processOneItem(config, item, downloadDir)
+		if err != nil {
+			log.Printf("Error: failed to process item %s, err: %v", item.Url, err)
+		} else {
+			successful += 1
+		}
 	}
+	return successful
 }
 
 func processOneItem(config *common.ServerConfig, item *prefetcher.PrefetchItem, downloadDir string) error {
