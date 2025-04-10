@@ -3,6 +3,7 @@
     "amsr",
     "httpserver",
     "prefetcher",
-    "prefetchers"
+    "prefetchers",
+    "resp"
   ]
 }

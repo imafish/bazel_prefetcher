@@ -13,12 +13,12 @@ func NewPrefetchFactory() *PrefetchFactory {
 	return &PrefetchFactory{}
 }
 
-func (f *PrefetchFactory) CreatePrefetchMatcher(config *common.ServerConfig, matcherConfig common.MatcherConfig) (PrefetchMatcher, error) {
+func (f *PrefetchFactory) CreatePrefetchMatcher(srcDir string, matcherConfig common.MatcherConfig) (PrefetchMatcher, error) {
 	var result PrefetchMatcher
 	switch matcherConfig.Type {
 	case "anchor":
 		result = &PrefetchMatcherAnchor{
-			file:     path.Join(config.SrcDir, matcherConfig.File),
+			file:     path.Join(srcDir, matcherConfig.File),
 			anchor:   matcherConfig.AnchorRegex,
 			format:   matcherConfig.Format,
 			regexStr: matcherConfig.Regex,
@@ -26,7 +26,7 @@ func (f *PrefetchFactory) CreatePrefetchMatcher(config *common.ServerConfig, mat
 		}
 	case "regex":
 		result = &PrefetchMatcherRegex{
-			file:   path.Join(config.SrcDir, matcherConfig.File),
+			file:   path.Join(srcDir, matcherConfig.File),
 			regex:  matcherConfig.Regex,
 			format: matcherConfig.Format,
 		}
@@ -41,4 +41,24 @@ func (f *PrefetchFactory) CreatePrefetchMatcher(config *common.ServerConfig, mat
 	}
 
 	return result, nil
+}
+
+func CreatePrefetchersFromConfig(srcDir string, prefetchConfig *common.PrefetchConfig) ([]PrefetchMatchers, error) {
+
+	prefetchFactory := NewPrefetchFactory()
+	prefetchers := make([]PrefetchMatchers, 0, len(prefetchConfig.Items))
+	for _, pf := range prefetchConfig.Items {
+		urlMatcher, err := prefetchFactory.CreatePrefetchMatcher(srcDir, pf.UrlMatcherConfig)
+		if err != nil {
+			return nil, err
+		}
+		hashMatcher, err := prefetchFactory.CreatePrefetchMatcher(srcDir, pf.HashMatcherConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		prefetchers = append(prefetchers, PrefetchMatchers{Name: pf.Name, UrlMatcher: urlMatcher, HashMatcher: hashMatcher})
+	}
+
+	return prefetchers, nil
 }

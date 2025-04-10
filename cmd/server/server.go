@@ -34,19 +34,9 @@ func main() {
 	serverConfig.SrcDir = path.Join(serverConfig.Server.Workdir, "src")
 
 	// create prefetch matchers
-	prefetchFactory := prefetcher.NewPrefetchFactory()
-	prefetchers := make([]prefetcher.PrefetchMatchers, 0, len(serverConfig.PrefetchConfig.Items))
-	for _, pf := range serverConfig.PrefetchConfig.Items {
-		urlMatcher, err := prefetchFactory.CreatePrefetchMatcher(serverConfig, pf.UrlMatcherConfig)
-		if err != nil {
-			log.Fatalf("Failed to create url matcher for config: %v, error: %v", pf, err)
-		}
-		hashMatcher, err := prefetchFactory.CreatePrefetchMatcher(serverConfig, pf.HashMatcherConfig)
-		if err != nil {
-			log.Fatalf("Failed to create hash matcher for config: %v, error: %v", pf, err)
-		}
-
-		prefetchers = append(prefetchers, prefetcher.PrefetchMatchers{Name: pf.Name, UrlMatcher: urlMatcher, HashMatcher: hashMatcher})
+	prefetchers, err := prefetcher.CreatePrefetchersFromConfig(serverConfig.SrcDir, serverConfig.PrefetchConfig)
+	if err != nil {
+		log.Fatalf("Failed to generate prefetchers: %v", err)
 	}
 
 	logServerConfig(serverConfig)
@@ -100,7 +90,7 @@ func process(config *common.ServerConfig, prefetchers []prefetcher.PrefetchMatch
 	updateGit(config)
 
 	common.LogSeparator("Analyzing prefetch items...")
-	items, err := prefetcher.AnalyzePrefetchItems(config, prefetchers)
+	items, err := prefetcher.AnalyzePrefetchItems(prefetchers, path.Join(config.Server.Workdir, "data"))
 	if err != nil {
 		log.Println("Error analyzing prefetch items:", err)
 		return
@@ -276,12 +266,6 @@ func saveAsBazelCache(item *prefetcher.PrefetchItem, cacheDir string) error {
 	log.Printf("File moved to bazel cache: %s", innerFile)
 	item.Path = outerDir
 	return nil
-}
-
-func bazelCacheDir() string {
-	username := os.Getenv("USER")
-	bazelCachePath := path.Join(os.Getenv("HOME"), ".cache/bazel", fmt.Sprintf("bazel_%s", username), "cache/repos/v1/content_addressable/sha256")
-	return bazelCachePath
 }
 
 func updateGit(config *common.ServerConfig) error {

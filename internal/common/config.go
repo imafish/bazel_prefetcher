@@ -67,7 +67,7 @@ func ReadServerConfig(serverConfigPath string, prefetchConfigPath string) (*Serv
 		return nil, err
 	}
 
-	prefetchConfig, err := readPrefetchConfig(prefetchConfigPath)
+	prefetchConfig, err := ReadPrefetchConfig(prefetchConfigPath)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func readServerConfig(filePath string) (*ServerConfig, error) {
 }
 
 // Function to read prefetch.json
-func readPrefetchConfig(filePath string) (*PrefetchConfig, error) {
+func ReadPrefetchConfig(filePath string) (*PrefetchConfig, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
