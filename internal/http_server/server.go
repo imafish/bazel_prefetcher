@@ -12,7 +12,7 @@ func StartServer(config *common.ServerConfig) {
 	// serve `/file` requests
 	serveFiles(config)
 
-	// serve `/api/v1` request
+	// serve `/restapi/v1` request
 	serveApiV1(config)
 
 	// serve `/` requests

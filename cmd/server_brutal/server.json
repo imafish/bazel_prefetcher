@@ -1,0 +1,43 @@
+{
+  "server": {
+    "port": 7777,
+    "host": "localhost",
+    "timeout": 300,
+    "downloader": "aria2",
+    "workdir": "$home/workspace_bazel_prefetcher",
+    "scheduler": {
+      "interval": 3600,
+      "start_time": "18:00",
+      "end_time": "18:00"
+    }
+  },
+  "downloaders": [
+    {
+      "name": "aria2",
+      "cmd": "aria2c",
+      "default_args": [
+        "-x",
+        "6",
+        "-s",
+        "24",
+        "--min-split-size=1M",
+        "-o",
+        "$out",
+        "$url"
+      ],
+      "args": [],
+      "args_unused": [
+        {
+          "matcher": {
+            "type": "url",
+            "pattern": "^https?://ddad\\.artifactory\\.cc\\.bmwgroup\\.net"
+          },
+          "args": [
+            "--http-user=imafish",
+            "--http-passwd=12345"
+          ]
+        }
+      ]
+    }
+  ]
+}
