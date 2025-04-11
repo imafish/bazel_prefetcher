@@ -90,7 +90,7 @@ func handlePrefetchItem(item *prefetcher.PrefetchItem, srcDir string, serverAddr
 
 func bazelCacheDir() string {
 	username := os.Getenv("USER")
-	bazelCachePath := path.Join(os.Getenv("HOME"), ".cache/bazel", fmt.Sprintf("bazel_%s", username), "cache/repos/v1/content_addressable/sha256")
+	bazelCachePath := path.Join(os.Getenv("HOME"), ".cache/bazel", fmt.Sprintf("_bazel_%s", username), "cache/repos/v1")
 	return bazelCachePath
 }
 
@@ -173,7 +173,8 @@ func compareFileHash(item *prefetcher.PrefetchItem) (bool, error) {
 
 func putFileIntoBazelCache(item *prefetcher.PrefetchItem, cacheDir string) error {
 	log.Printf("Placing to bazel cache")
-	outerDir := path.Join(cacheDir, item.Hash)
+	cacheDirInside := path.Join(cacheDir, "content_addressable", "sha256")
+	outerDir := path.Join(cacheDirInside, item.Hash)
 	innerFile := path.Join(outerDir, "file")
 	hashFilePath := path.Join(outerDir, fmt.Sprintf("id-%s", item.HashOfUrl))
 	os.MkdirAll(outerDir, 0755)

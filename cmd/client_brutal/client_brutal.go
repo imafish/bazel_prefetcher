@@ -21,7 +21,7 @@ func main() {
 
 	l := common.NewLoggerWithPrefixAndColor("Main: ")
 	serverAddr := os.Args[1]
-	repositoryCachePath := path.Join(os.Getenv("HOME"), ".cache/bazel", fmt.Sprintf("bazel_%s", os.Getenv("USER")), "cache/repos/v1")
+	repositoryCachePath := path.Join(os.Getenv("HOME"), ".cache/bazel", fmt.Sprintf("_bazel_%s", os.Getenv("USER")), "cache/repos/v1")
 	if len(os.Args) == 3 {
 		repositoryCachePath = os.Args[2]
 		l.Printf("Using repository cache path: %s", repositoryCachePath)
