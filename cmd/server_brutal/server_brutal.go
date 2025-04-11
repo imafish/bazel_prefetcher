@@ -61,7 +61,7 @@ func logServerConfig(config *common.ServerConfig) {
 
 func process(config *common.ServerConfig) {
 	start := time.Now()
-	common.LogSeparator("updating git")
+	common.LogSeparator("updating source code...")
 	updateGit(config)
 
 	common.LogSeparator("running bazel build --nobuild...")

@@ -33,9 +33,15 @@
 
 ## step 2
   1. server_brutal
-    1. [ ] clean (cache items not used for xx days)
-    2. [ ] configurable bazel targets.
-    3. [ ] restapi to manage bazel targets.
+    1. [ ] more targets
+      1. [ ] coverage
+      2. [ ] coverity
+      3. [ ] tests
+      4. [ ] clang-tidy
+      5. [ ] git-hook
+    2. [ ] clean (cache items not used for xx days)
+    3. [ ] configurable bazel targets.
+    4. [ ] restapi to manage bazel targets.
   2. client_brutal
     1. [ ] clean (cache items not used for xx days)
 

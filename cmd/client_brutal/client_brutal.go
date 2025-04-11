@@ -69,8 +69,10 @@ func syncRepositoryCache(serverAddr, repositoryCachePath string) (int64, error) 
 
 	totalfiles := len(files)
 	var totalSyncedSize int64
+	downloadedFiles := 0
+	skippedFiles := 0
 	for i, file := range files {
-		l.SmallSeparator("%d/%d files", i+1, totalfiles)
+		l.SmallSeparator("%d/%d, downloaded: %d, skipped: %d ", i+1, totalfiles, downloadedFiles, skippedFiles)
 		l.Printf("Processing file: %s, size: %d", file.Path, file.Size)
 
 		localFilePath := path.Join(repositoryCachePath, file.Path)
@@ -81,6 +83,7 @@ func syncRepositoryCache(serverAddr, repositoryCachePath string) (int64, error) 
 		}
 		if !shouldDownload {
 			l.Printf("File %s already exists and matches size, skipping.", file.Path)
+			skippedFiles++
 			continue // File matches size, skip
 		}
 
@@ -90,8 +93,12 @@ func syncRepositoryCache(serverAddr, repositoryCachePath string) (int64, error) 
 			return 0, fmt.Errorf("failed to download file %s: %w", file.Path, err)
 		}
 		l.Printf("File %s downloaded successfully.", file.Path)
+		downloadedFiles++
 		totalSyncedSize += file.Size
 	}
+
+	l.SmallSeparator("Summary:")
+	l.Printf("Total files: %d, Downloaded: %d, Skipped: %d", totalfiles, downloadedFiles, skippedFiles)
 
 	return totalSyncedSize, nil
 }
@@ -123,8 +130,8 @@ func checkFileExists(localFilePath string, expectedSize int64) (bool, error) {
 	l.Printf("Checking if file %s exists...", localFilePath)
 	if fileInfo, err := os.Stat(localFilePath); err == nil {
 		if fileInfo.Size() == expectedSize {
-			l.Printf("File %s already exists and matches size, skipping.", localFilePath)
-			return true, nil // File exists and matches size
+			l.Printf("File %s already exists and matches size", localFilePath)
+			return false, nil // File exists and matches size
 		}
 
 		// File exists but size does not match, replace it
@@ -175,7 +182,8 @@ func downloadFile(client *http.Client, serverAddr string, file fileObj, localPat
 	defer outFile.Close()
 
 	var n int64
-	var m int64
+	var m int64 = -1
+	const OneHundredM = 100 * 1024 * 1024 // 100 MB
 	start := time.Now()
 	for {
 		bytesRead, readErr := resp.Body.Read(buffer)
@@ -185,14 +193,14 @@ func downloadFile(client *http.Client, serverAddr string, file fileObj, localPat
 				return fmt.Errorf("failed to write to file %s: %w", localPath, writeErr)
 			}
 			n += int64(bytesWritten)
-			if n/(100*1024*1024) > m { // Check if we've crossed a 100MB boundary
-				m = n / (100 * 1024 * 1024)
+			if n/OneHundredM > m && file.Size > OneHundredM { // Check if we've crossed a 100MB boundary
+				m = n / OneHundredM
 				elapsed := time.Since(start)
-				averageSpeed := n / int64(elapsed.Seconds())
+				averageSpeed := n / int64(elapsed.Seconds()+1)
 				l.Printf("Downloaded: %s / %s, Time: %s, Avg Speed: %s/s",
 					prettyPrintBytes(n), prettyPrintBytes(file.Size), elapsed, prettyPrintBytes(averageSpeed))
 			}
-			time.Sleep(3 * time.Millisecond) // Sleep for 3ms
+			time.Sleep(2 * time.Millisecond)
 		}
 		if readErr == io.EOF {
 			break

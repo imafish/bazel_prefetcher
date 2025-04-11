@@ -73,8 +73,8 @@ func colorPrefix(prefix string) string {
 
 func (l *LoggerWithPrefix) SmallSeparator(text string, args ...interface{}) {
 	n := 49 - len(text) - 4
-	if n < 0 {
-		n = 0
+	if n < 7 {
+		n = 7
 	}
 	m := n / 2
 	if n%2 == 1 {
@@ -82,7 +82,7 @@ func (l *LoggerWithPrefix) SmallSeparator(text string, args ...interface{}) {
 	}
 	n = n / 2
 
-	log.Print(l.Prefix, strings.Repeat(">", n), "  ", fmt.Sprintf(text, args...), "  ", strings.Repeat("<", m))
+	log.Print(l.Prefix, blue, strings.Repeat(">", n), reset, "  ", fmt.Sprintf(text, args...), "  ", blue, strings.Repeat("<", m), reset)
 }
 
 func (l *LoggerWithPrefix) Printf(format string, args ...interface{}) {
