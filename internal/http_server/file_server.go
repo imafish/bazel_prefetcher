@@ -2,7 +2,6 @@ package httpserver
 
 import (
 	"internal/common"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -14,15 +13,16 @@ import (
 func serveFiles(config *common.ServerConfig) {
 	// Set the root directory to serve
 	rootDir := path.Join(config.Server.Workdir, "data")
+	l := common.NewLoggerWithPrefixAndColor("FileServer: ")
 
 	// Create a file server that preserves paths
 	http.HandleFunc("GET /files/", func(w http.ResponseWriter, r *http.Request) {
 		// Clean the path to prevent directory traversal
 		requestedPath := filepath.Clean(r.URL.Path)
-		log.Print(requestedPath)
+		l.Print(requestedPath)
 		requestedPath = strings.TrimPrefix(requestedPath, "/files")
 		fullPath := filepath.Join(rootDir, requestedPath)
-		log.Printf("requested path `%s` mapped to `%s`", requestedPath, fullPath)
+		l.Printf("requested path `%s` mapped to `%s`", requestedPath, fullPath)
 
 		// Check if the file exists
 		fileInfo, err := os.Stat(fullPath)
@@ -50,6 +50,7 @@ func serveFiles(config *common.ServerConfig) {
 }
 
 func serveDirListing(w http.ResponseWriter, r *http.Request, dirPath, webPath string) {
+	l := common.NewLoggerWithPrefixAndColor("DirListing: ")
 	// Open the directory
 	dir, err := os.Open(dirPath)
 	if err != nil {
@@ -73,7 +74,7 @@ func serveDirListing(w http.ResponseWriter, r *http.Request, dirPath, webPath st
 	html := "<html><head><title>Directory listing for " + webPath + "</title></head><body>"
 	html += "<h1>Directory listing for " + webPath + "</h1><hr><ul>"
 
-	log.Printf("Listing directory: %s, %s", webPath, dirPath)
+	l.Printf("Listing directory: %s, %s", webPath, dirPath)
 	// Add parent directory link if not at root
 	if webPath != "/" {
 		parentPath := filepath.Dir(webPath)

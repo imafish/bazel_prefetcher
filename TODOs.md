@@ -1,5 +1,5 @@
 
-# PLAN
+# PLAN 1
 
 ## step 1
 
@@ -24,10 +24,26 @@
    1. [ ] find dependencies from bazel output
    2. [ ] downloader API
 
+# PLAN 2
+
+## step 1
+
+  1. server_brutal
+  2. client_brutal
+
+## step 2
+  1. server_brutal
+    1. [ ] clean (cache items not used for xx days)
+    2. [ ] configurable bazel targets.
+    3. [ ] restapi to manage bazel targets.
+  2. client_brutal
+    1. [ ] clean (cache items not used for xx days)
+
 # Minor improvements
 
-1. [ ] calculate hash of downloaded file
-2. [ ] single line separator
-3. [ ] improved logging
+1. [x] calculate hash of downloaded file
+2. [x] single line separator
+3. [x] improved logging (for HTML server)
+4. [ ] improved logging (others)
 4. [ ] internal/db/item.go: remove sqlite specific query
 5. [ ] internal/db/item.go: the table should have more constraints -- e.g. Url should be unique.

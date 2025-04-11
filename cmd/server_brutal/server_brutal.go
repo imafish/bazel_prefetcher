@@ -96,6 +96,16 @@ func runBazelBuild(config *common.ServerConfig) error {
 	srcDir := path.Join(config.Server.Workdir, "src")
 	dataDir := path.Join(config.Server.Workdir, "data")
 
+	repositoryCacheParam := fmt.Sprintf("--repository_cache=%s", dataDir)
+	l.Printf("Using repository cache path: %s", dataDir)
+
+	l.Print("cleanning up...")
+	err := runOneCommand("bazel", []string{"clean", repositoryCacheParam}, srcDir)
+	if err != nil {
+		l.Printf("Failed to run bazel clean command: %v", err)
+		return err
+	}
+
 	bazelCommands := [][]string{
 		{"--config=spp_host_gcc", "//platform/aas/intc/lifecycle_state_machine/code:lifecycle_state_machine"},
 		{"--config=spp_host_gcc", "//platform/aas/intc/phmheartbeatproxy/code:PhmHeartBeatProxy"},
@@ -103,30 +113,37 @@ func runBazelBuild(config *common.ServerConfig) error {
 	}
 
 	for _, bc := range bazelCommands {
-		bc = append([]string{fmt.Sprintf("--repository_cache=%s", dataDir), "build"}, bc...)
-		cmd := exec.Command("bazel", bc...)
-		cmd.Dir = srcDir
-		cmd.Stderr = os.Stderr
-		l.SmallSeparator("Running bazel command")
-		l.Printf("Executing command: %s", strings.Join(cmd.Args, " "))
-
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			l.Printf("failed to create stdout pipe: %v", err)
-			return err
-		}
-		if err := cmd.Start(); err != nil {
-			l.Printf("failed to start bazel cmd, error: %v", err)
-			return err
-		}
-
-		go io.Copy(os.Stdout, stdout)
-
-		if err := cmd.Wait(); err != nil {
-			l.Printf("failed to wait for bazel cmd, error: %v", err)
+		bc = append([]string{"build", repositoryCacheParam, "--nobuild"}, bc...)
+		if err := runOneCommand("bazel", bc, srcDir); err != nil {
+			l.Printf("Failed to run bazel command: %v", err)
 			return err
 		}
 	}
 
+	return nil
+}
+
+func runOneCommand(cmd string, params []string, srcDir string) error {
+	l := common.NewLoggerWithPrefixAndColor("cmd: ")
+	l.Printf("Running command: %s %s", cmd, strings.Join(params, " "))
+	command := exec.Command(cmd, params...)
+	command.Stderr = os.Stderr
+	command.Dir = srcDir
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		l.Printf("failed to create stdout pipe: %v", err)
+		return err
+	}
+	if err := command.Start(); err != nil {
+		l.Printf("failed to start bazel cmd, error: %v", err)
+		return err
+	}
+
+	go io.Copy(os.Stdout, stdout)
+
+	if err := command.Wait(); err != nil {
+		l.Printf("failed to wait for bazel cmd, error: %v", err)
+		return err
+	}
 	return nil
 }

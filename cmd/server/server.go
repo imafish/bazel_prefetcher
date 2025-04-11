@@ -254,7 +254,8 @@ func saveItemToDatabase(config *common.ServerConfig, item *prefetcher.PrefetchIt
 
 func saveAsBazelCache(item *prefetcher.PrefetchItem, cacheDir string) error {
 	log.Printf("Placing to bazel cache")
-	outerDir := path.Join(cacheDir, item.Hash)
+	cacheDirInside := path.Join(cacheDir, "content_addressable", "sha256")
+	outerDir := path.Join(cacheDirInside, item.Hash)
 	innerFile := path.Join(outerDir, "file")
 	hashFilePath := path.Join(outerDir, fmt.Sprintf("id-%s", item.HashOfUrl))
 	os.MkdirAll(outerDir, 0755)

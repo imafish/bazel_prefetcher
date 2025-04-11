@@ -53,10 +53,11 @@ func checkIfExistsInBazelCache(item *PrefetchItem, cacheDir string) error {
 
 	hashOfUrl := fmt.Sprintf("%x", sha256.Sum256([]byte(item.Url)))
 	l.Printf("item: %s, %s, %s, %s", item.Path, item.Hash, item.Url, hashOfUrl)
+	cacheDirInside := path.Join(cacheDir, "content_addressable", "sha256")
 	if item.Hash == "" {
 		// just try to find the id file exist
 		hashFilename := fmt.Sprintf("id-%s", hashOfUrl)
-		found, parentDir, err := findFileAndReturnParent(cacheDir, hashFilename)
+		found, parentDir, err := findFileAndReturnParent(cacheDirInside, hashFilename)
 		if err != nil {
 			return err
 		}
@@ -69,7 +70,7 @@ func checkIfExistsInBazelCache(item *PrefetchItem, cacheDir string) error {
 		}
 	}
 
-	outerDir := path.Join(cacheDir, item.Hash)
+	outerDir := path.Join(cacheDirInside, item.Hash)
 	innerFile := path.Join(outerDir, "file")
 	hashFile := path.Join(outerDir, fmt.Sprintf("id-%s", hashOfUrl))
 
