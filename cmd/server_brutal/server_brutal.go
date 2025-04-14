@@ -16,14 +16,13 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 3 {
-		log.Fatalf("usage: %s <server_config.json> <prefetches.json>", os.Args[0])
+	if len(os.Args) < 2 {
+		log.Fatalf("usage: %s <server_config.json>", os.Args[0])
 	}
 	serverConfigFile := os.Args[1]
-	prefetchConfigFile := os.Args[2]
 
 	// load config
-	serverConfig, err := common.ReadServerConfig(serverConfigFile, prefetchConfigFile)
+	serverConfig, err := common.ReadServerConfigJson(serverConfigFile)
 	if err != nil {
 		log.Printf("Error reading server config: %s", err)
 		return
@@ -31,7 +30,8 @@ func main() {
 	serverConfig.Server.Workdir = strings.ReplaceAll(serverConfig.Server.Workdir, "$home", os.Getenv("HOME"))
 	serverConfig.SrcDir = path.Join(serverConfig.Server.Workdir, "src")
 
-	logServerConfig(serverConfig)
+	common.LogSeparator("server config")
+	log.Printf("Server Config: %+v\n", serverConfig)
 
 	// LOGO
 	log.Print(common.Imafish())
@@ -48,15 +48,6 @@ func main() {
 		process(serverConfig)
 		return nil
 	})
-}
-
-func logServerConfig(config *common.ServerConfig) {
-	common.LogSeparator("server config")
-	log.Printf("Server Config: %+v\n", config)
-	log.Printf("Got %d prefetcher configs.", len(config.PrefetchConfig.Items))
-	for _, item := range config.PrefetchConfig.Items {
-		log.Print(item)
-	}
 }
 
 func process(config *common.ServerConfig) {

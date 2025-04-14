@@ -61,13 +61,13 @@ type PrefetchConfig struct {
 	Items []*Package `json:"items"`
 }
 
-func ReadServerConfig(serverConfigPath string, prefetchConfigPath string) (*ServerConfig, error) {
-	serverConfig, err := readServerConfig(serverConfigPath)
+func ReadServerConfigAll(serverConfigPath string, prefetchConfigPath string) (*ServerConfig, error) {
+	serverConfig, err := ReadServerConfigJson(serverConfigPath)
 	if err != nil {
 		return nil, err
 	}
 
-	prefetchConfig, err := ReadPrefetchConfig(prefetchConfigPath)
+	prefetchConfig, err := ReadPrefetchConfigJson(prefetchConfigPath)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func ReadServerConfig(serverConfigPath string, prefetchConfigPath string) (*Serv
 }
 
 // Function to read server.json
-func readServerConfig(filePath string) (*ServerConfig, error) {
+func ReadServerConfigJson(filePath string) (*ServerConfig, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func readServerConfig(filePath string) (*ServerConfig, error) {
 }
 
 // Function to read prefetch.json
-func ReadPrefetchConfig(filePath string) (*PrefetchConfig, error) {
+func ReadPrefetchConfigJson(filePath string) (*PrefetchConfig, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err

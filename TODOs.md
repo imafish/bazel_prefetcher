@@ -28,8 +28,8 @@
 
 ## step 1
 
-  1. server_brutal
-  2. client_brutal
+  1. [x] server_brutal
+  2. [x] client_brutal
 
 ## step 2
   1. server_brutal

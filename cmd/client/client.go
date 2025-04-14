@@ -27,7 +27,7 @@ func main() {
 
 	l := common.NewLoggerWithPrefixAndColor("Main: ")
 
-	prefetchConfig, err := common.ReadPrefetchConfig(prefetchConfigFile)
+	prefetchConfig, err := common.ReadPrefetchConfigJson(prefetchConfigFile)
 	if err != nil {
 		l.Fatalf("failed to load prefetch config: %v", err)
 	}
