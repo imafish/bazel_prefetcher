@@ -72,10 +72,18 @@ func updateGit(config *common.ServerConfig) error {
 		RepoPath: gitDir,
 	}
 
-	err := git.UpdateRepository()
-	if err != nil {
-		log.Printf("Failed to update repository: %v", err)
-		return err
+	retryCnt := 3
+	var err error
+	for i := 0; i < retryCnt; i++ {
+		log.Printf("Attempt #%d to update repository...", i+1)
+
+		err = git.UpdateRepository()
+		if err != nil {
+			log.Printf("Failed to update repository: %v", err)
+		} else {
+			log.Println("Repository updated successfully.")
+			break
+		}
 	}
 
 	return nil
@@ -105,8 +113,19 @@ func runBazelBuild(config *common.ServerConfig) error {
 
 	for _, bc := range bazelCommands {
 		bc = append([]string{"build", repositoryCacheParam, "--nobuild"}, bc...)
-		if err := runOneCommand("bazel", bc, srcDir); err != nil {
-			l.Printf("Failed to run bazel command: %v", err)
+		retryCnt := 5
+		for i := 0; i < retryCnt; i++ {
+			l.Printf("Attempt #%d to run bazel command...", i+1)
+			if err = runOneCommand("bazel", bc, srcDir); err != nil {
+				l.Printf("Failed to run bazel command: %v", err)
+				l.Printf("Retrying in 5 seconds...")
+				time.Sleep(5 * time.Second)
+			} else {
+				break
+			}
+		}
+		if err != nil {
+			l.Printf("Failed to run bazel command after %d attempts: %v", retryCnt, err)
 			return err
 		}
 	}

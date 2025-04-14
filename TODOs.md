@@ -45,6 +45,10 @@
   2. client_brutal
     1. [ ] clean (cache items not used for xx days)
 
+# PLAN 3
+
+1. bazel-remote, content-addressable cache
+
 # Minor improvements
 
 1. [x] calculate hash of downloaded file
