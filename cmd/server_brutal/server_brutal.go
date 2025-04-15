@@ -64,6 +64,7 @@ func process(config *common.ServerConfig) {
 }
 
 func updateGit(config *common.ServerConfig) error {
+	l := common.NewLoggerWithPrefixAndColor("git: ")
 	// Example function to update git repository
 	gitDir := path.Join(config.Server.Workdir, "src")
 	log.Println("Updating git repository at:", gitDir)
@@ -79,9 +80,9 @@ func updateGit(config *common.ServerConfig) error {
 
 		err = git.UpdateRepository()
 		if err != nil {
-			log.Printf("Failed to update repository: %v", err)
+			l.Printf("Failed to update repository: %v", err)
 		} else {
-			log.Println("Repository updated successfully.")
+			l.Printf("Repository updated successfully after %d attempts", i+1)
 			break
 		}
 	}
@@ -121,6 +122,7 @@ func runBazelBuild(config *common.ServerConfig) error {
 				l.Printf("Retrying in 5 seconds...")
 				time.Sleep(5 * time.Second)
 			} else {
+				l.Printf("Bazel command executed successfully after %d attempts", i+1)
 				break
 			}
 		}
