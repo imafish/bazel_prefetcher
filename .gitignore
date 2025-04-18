@@ -31,3 +31,4 @@ cmd/client/prefetch.json
 cmd/server_brutal/server
 cmd/server_brutal/serverbrutal
 cmd/client_brutal/clientbrutal
+cmd/server_brutal/server.json

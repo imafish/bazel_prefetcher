@@ -25,6 +25,14 @@ type ServerConfig struct {
 	PrefetchConfig *PrefetchConfig
 	ItemTable      *db.ItemTable
 	SrcDir         string
+	Cleanup        CleanupConfig `json:"cleanup"` // Added field for cleanup configuration
+}
+
+type CleanupConfig struct {
+	Enabled      bool  `json:"enabled"`
+	MaxSize      int64 `json:"max_size"`
+	TolerantSize int64 `json:"tolerant_size"`
+	MaxAge       int   `json:"max_age"`
 }
 
 type DownloaderConfig struct {

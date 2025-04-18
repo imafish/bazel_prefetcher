@@ -9,6 +9,12 @@
       "interval": 3600,
       "start_time": "18:00",
       "end_time": "18:00"
+    },
+    "cleanup": {
+      "enabled": true,
+      "max_size": 256000000000,
+      "tolerant_size": 128000000000,
+      "max_age": 30
     }
   },
   "downloaders": [

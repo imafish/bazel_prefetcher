@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"internal/cleanup"
 	"internal/common"
 	"internal/git"
 	"internal/httpserver"
@@ -57,6 +58,21 @@ func process(config *common.ServerConfig) {
 
 	common.LogSeparator("running bazel build --nobuild...")
 	runBazelBuild(config)
+
+	common.LogSeparator("cleaning up...")
+	if config.Cleanup.Enabled {
+		cleanup := cleanup.Cleanup{
+			Workdir:      config.Server.Workdir,
+			MaxSize:      config.Cleanup.MaxSize,
+			TolerantSize: config.Cleanup.TolerantSize,
+			MaxAge:       int64(config.Cleanup.MaxAge * 24 * 60 * 60), // Convert days to seconds
+		}
+		if err := cleanup.Run(); err != nil {
+			log.Printf("Error during cleanup: %s", err)
+		}
+	} else {
+		log.Printf("Cleanup is disabled in the configuration.")
+	}
 
 	end := time.Now()
 	common.LogSeparator("summary")
