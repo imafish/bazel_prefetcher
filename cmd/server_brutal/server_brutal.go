@@ -83,7 +83,7 @@ func process(server *server) {
 	common.LogSeparator("cleaning up...")
 	if config.Server.Cleanup.Enabled {
 		cleanup := cleanup.Cleanup{
-			Workdir:      config.Server.Workdir,
+			Workdir:      path.Join(config.Server.Workdir, "data", "content_addressable", "sha256"),
 			MaxSize:      config.Server.Cleanup.MaxSize,
 			TolerantSize: config.Server.Cleanup.TolerantSize,
 			MaxAge:       int64(config.Server.Cleanup.MaxAge * 24 * 60 * 60), // Convert days to seconds
@@ -137,19 +137,13 @@ func runBazelBuild(server *server) error {
 	repositoryCacheParam := fmt.Sprintf("--repository_cache=%s", dataDir)
 	l.Printf("Using repository cache path: %s", dataDir)
 
-	l.Print("cleanning up...")
-	err := runOneCommand("bazel", []string{"clean", repositoryCacheParam}, srcDir)
-	if err != nil {
-		l.Printf("Failed to run bazel clean command: %v", err)
-		return err
-	}
-
 	bazelCommands := server.BazelCommands.Commands
+	var err error
 
 	for _, bc := range bazelCommands {
 		bc = append(bc, repositoryCacheParam)
 		retryCnt := 5
-		for i := 0; i < retryCnt; i++ {
+		for i := range retryCnt {
 			l.Printf("Attempt #%d to run bazel command...", i+1)
 			if err = runOneCommand("bazel", bc, srcDir); err != nil {
 				l.Printf("Failed to run bazel command: %v", err)

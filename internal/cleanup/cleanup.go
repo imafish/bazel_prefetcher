@@ -51,6 +51,7 @@ func (c *Cleanup) Run() error {
 	return c.doCleanUp()
 }
 
+// TODO: it looks like there's a bug in this code. For directory contains files deepth > 1, it gets the size wrong.
 func getDirInfo(path string) (int64, []fileInfo, error) {
 	var totalSize int64
 	var dirInfo []fileInfo
