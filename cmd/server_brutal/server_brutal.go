@@ -48,7 +48,9 @@ func main() {
 	}
 
 	common.LogSeparator("server config")
-	log.Printf("Server Config: %+v\n", server)
+	common.PrintStruct(server, func(s string) {
+		log.Printf("%s", s)
+	})
 
 	// LOGO
 	log.Print(common.Imafish())
