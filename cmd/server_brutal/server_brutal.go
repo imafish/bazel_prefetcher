@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"internal/cleanup"
@@ -19,6 +20,8 @@ import (
 type server struct {
 	ServerConfig  *common.ServerConfig
 	BazelCommands *common.BazelCommandsConfig
+
+	Mtx sync.Mutex
 }
 
 func main() {
@@ -28,7 +31,9 @@ func main() {
 	serverConfigFile := os.Args[1]
 	bazelCommandsConfigFile := os.Args[2]
 
-	server := &server{}
+	server := &server{
+		Mtx: sync.Mutex{},
+	}
 	var err error
 
 	// load config
@@ -58,7 +63,12 @@ func main() {
 	serverConfig := server.ServerConfig
 
 	// start http server
-	go httpserver.StartServer(serverConfig)
+	httpServerBuilder := httpserver.NewHttpServerBuilder(serverConfig)
+	httpServerBuilder.ServeFiles()
+	httpServerBuilder.ServeApiV1Files()
+	httpServer := httpServerBuilder.Build()
+	log.Printf("Starting HTTP server on port %d", serverConfig.Server.Port)
+	go httpServer.ListenAndServe()
 
 	// start scheduler (periodically update repository, parse files and download)
 	scheduler, err := NewScheduler(serverConfig.Server.Scheduler.Interval, serverConfig.Server.Scheduler.StartTime, serverConfig.Server.Scheduler.EndTime)
@@ -137,7 +147,15 @@ func runBazelBuild(server *server) error {
 	repositoryCacheParam := fmt.Sprintf("--repository_cache=%s", dataDir)
 	l.Printf("Using repository cache path: %s", dataDir)
 
-	bazelCommands := server.BazelCommands.Commands
+	// get a copy of bazel commands
+	server.Mtx.Lock()
+	bazelCommands := make([][]string, len(server.BazelCommands.Commands))
+	for i, bc := range server.BazelCommands.Commands {
+		bazelCommands[i] = make([]string, len(bc))
+		copy(bazelCommands[i], bc)
+	}
+	server.Mtx.Unlock()
+
 	var err error
 
 	for _, bc := range bazelCommands {

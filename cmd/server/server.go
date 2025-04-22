@@ -74,7 +74,12 @@ func main() {
 	log.Print(common.Imafish())
 
 	// start http server
-	go httpserver.StartServer(serverConfig)
+	httpServerBuilder := httpserver.NewHttpServerBuilder(serverConfig)
+	httpServerBuilder.ServeFiles()
+	httpServerBuilder.ServeApiV1Files()
+	httpServer := httpServerBuilder.Build()
+	log.Printf("Starting HTTP server on port %d", serverConfig.Server.Port)
+	go httpServer.ListenAndServe()
 
 	// start scheduler (periodically update repository, parse files and download)
 	scheduler, err := NewScheduler(serverConfig.Server.Scheduler.Interval, serverConfig.Server.Scheduler.StartTime, serverConfig.Server.Scheduler.EndTime)

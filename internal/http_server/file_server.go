@@ -10,13 +10,13 @@ import (
 	"strings"
 )
 
-func serveFiles(config *common.ServerConfig) {
+func serveFiles(config *common.ServerConfig) func(http.ResponseWriter, *http.Request) {
 	// Set the root directory to serve
 	rootDir := path.Join(config.Server.Workdir, "data")
-	l := common.NewLoggerWithPrefixAndColor("FileServer: ")
 
 	// Create a file server that preserves paths
-	http.HandleFunc("GET /files/", func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		l := common.NewLoggerWithPrefixAndColor("FileServer: ")
 		// Clean the path to prevent directory traversal
 		requestedPath := filepath.Clean(r.URL.Path)
 		l.Print(requestedPath)
@@ -46,10 +46,10 @@ func serveFiles(config *common.ServerConfig) {
 		w.Header().Set("Content-Disposition", "attachment; filename="+filepath.Base(fullPath))
 		w.Header().Set("Content-Length", strconv.Itoa(int(fileInfo.Size())))
 		http.ServeFile(w, r, fullPath)
-	})
+	}
 }
 
-func serveDirListing(w http.ResponseWriter, r *http.Request, dirPath, webPath string) {
+func serveDirListing(w http.ResponseWriter, _ *http.Request, dirPath, webPath string) {
 	l := common.NewLoggerWithPrefixAndColor("DirListing: ")
 	// Open the directory
 	dir, err := os.Open(dirPath)

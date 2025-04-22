@@ -3,24 +3,49 @@ package httpserver
 import (
 	"fmt"
 	"internal/common"
-	"log"
 	"net/http"
+	"sync"
+	"time"
 )
 
-func StartServer(config *common.ServerConfig) {
+type HttpServerBuilder struct {
+	config   *common.ServerConfig
+	serveMux *http.ServeMux
+}
 
-	// serve `/file` requests
-	serveFiles(config)
+func NewHttpServerBuilder(config *common.ServerConfig) *HttpServerBuilder {
+	return &HttpServerBuilder{
+		config:   config,
+		serveMux: http.NewServeMux(),
+	}
+}
 
-	// serve `/restapi/v1` request
-	serveApiV1(config)
+func (b *HttpServerBuilder) ServeFiles() *HttpServerBuilder {
+	b.serveMux.HandleFunc("/files/", serveFiles(b.config))
+	return b
+}
 
-	// serve `/` requests
-	// http.HandleFunc("/", http.NotFound)
+func (b *HttpServerBuilder) ServeApiV1Files() *HttpServerBuilder {
+	b.serveMux.HandleFunc("/restapi/v1/files", serveApiV1GetAllFiles(b.config))
+	return b
+}
 
-	// Start server
-	addr := fmt.Sprintf(":%d", config.Server.Port)
-	log.Printf("Server started on http://localhost" + addr)
-	log.Printf("Access files at http://localhost" + addr + "/files/path/to/your/file")
-	http.ListenAndServe(addr, nil)
+func (b *HttpServerBuilder) ServeApiV1BazelCommands(bazelCommands *[][]string, mtx *sync.Mutex) *HttpServerBuilder {
+	b.serveMux.HandleFunc("GET /restapi/v1/bazelcommands", bazelCommandsGetList(bazelCommands, mtx))
+	b.serveMux.HandleFunc("GET /restapi/v1/bazelcommands/{index}", bazelCommandsGetOne(bazelCommands, mtx))
+	b.serveMux.HandleFunc("DELETE /restapi/v1/bazelcommands", bazelCommandsDelete(bazelCommands, mtx))
+	b.serveMux.HandleFunc("PUT /restapi/v1/bazelcommands", bazelCommandsPut(bazelCommands, mtx))
+	b.serveMux.HandleFunc("POST /restapi/v1/bazelcommands", bazelCommandsNew(bazelCommands, mtx))
+	return b
+}
+
+func (b *HttpServerBuilder) Build() *http.Server {
+	return &http.Server{
+		Addr:           fmt.Sprintf(":%d", b.config.Server.Port),
+		Handler:        b.serveMux,
+		IdleTimeout:    10 * time.Second, // b.config.Server.IdleTimeout,
+		ReadTimeout:    10 * time.Second, // b.config.Server.ReadTimeout,
+		WriteTimeout:   10 * time.Second, // b.config.Server.WriteTimeout,
+		MaxHeaderBytes: 1 << 20,          // b.config.Server.MaxHeaderBytes,
+	}
 }

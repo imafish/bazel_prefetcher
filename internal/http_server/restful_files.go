@@ -70,10 +70,8 @@ func getAllFilesHandler(w http.ResponseWriter, r *http.Request, config *common.S
 	}
 }
 
-func serveApiV1(config *common.ServerConfig) {
-	l := common.NewLoggerWithPrefixAndColor("restful_server: ")
-	http.HandleFunc("/restapi/v1/allfiles", func(w http.ResponseWriter, r *http.Request) {
-		l.Printf("Received request for all files")
+func serveApiV1GetAllFiles(config *common.ServerConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		getAllFilesHandler(w, r, config)
-	})
+	}
 }
