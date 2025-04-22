@@ -35,6 +35,9 @@ func printStruct(v interface{}, indent string, printFunc func(string)) {
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Type().Field(i)
 			fieldValue := val.Field(i)
+			if !field.IsExported() {
+				continue
+			}
 
 			// Construct the line for the field name and value
 			if fieldValue.Kind() == reflect.Ptr {
