@@ -45,7 +45,13 @@ func serveFiles(config *common.ServerConfig) func(http.ResponseWriter, *http.Req
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.Header().Set("Content-Disposition", "attachment; filename="+filepath.Base(fullPath))
 		w.Header().Set("Content-Length", strconv.Itoa(int(fileInfo.Size())))
-		http.ServeFile(w, r, fullPath)
+		file, err := os.Open(fullPath)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+		http.ServeContent(w, r, filepath.Base(fullPath), fileInfo.ModTime(), file)
 	}
 }
 

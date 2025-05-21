@@ -62,6 +62,7 @@ func getAllFilesHandler(w http.ResponseWriter, r *http.Request, config *common.S
 		return
 	}
 
+	l.Printf("Found %d files in directory %s", len(fileInfos), dirPath)
 	w.Header().Set("Content-Type", "application/json")
 
 	l.Printf("Sending %d files in response", len(fileInfos))
