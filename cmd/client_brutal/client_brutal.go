@@ -106,7 +106,7 @@ func syncRepositoryCache(serverAddr, repositoryCachePath string) (int64, error) 
 func getFileList(client *http.Client, serverAddr string) ([]fileObj, error) {
 	l := common.NewLoggerWithPrefixAndColor("GetFileList: ")
 	l.Printf("Querying server for file list...")
-	resp, err := client.Get(fmt.Sprintf("http://%s/restapi/v1/allfiles", serverAddr))
+	resp, err := client.Get(fmt.Sprintf("http://%s/restapi/v1/files", serverAddr))
 	if err != nil {
 		return nil, fmt.Errorf("failed to query server: %w", err)
 	}
@@ -174,7 +174,7 @@ func downloadFile(client *http.Client, serverAddr string, file fileObj, localPat
 		return fmt.Errorf("failed to download file %s, server returned: %s", localPath, resp.Status)
 	}
 
-	buffer := make([]byte, 100*1024) // 100 KB buffer
+	buffer := make([]byte, 10*1024*1024) // 10 MB buffer
 	outFile, err := os.Create(localPath)
 	if err != nil {
 		return fmt.Errorf("failed to create file %s: %w", localPath, err)
@@ -200,7 +200,7 @@ func downloadFile(client *http.Client, serverAddr string, file fileObj, localPat
 				l.Printf("Downloaded: %s / %s, Time: %s, Avg Speed: %s/s",
 					prettyPrintBytes(n), prettyPrintBytes(file.Size), elapsed, prettyPrintBytes(averageSpeed))
 			}
-			time.Sleep(2 * time.Millisecond)
+			// time.Sleep(5 * time.Millisecond)
 		}
 		if readErr == io.EOF {
 			break
