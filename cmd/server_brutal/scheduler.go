@@ -39,6 +39,7 @@ func NewScheduler(interval int, startTime, endTime string) (*scheduler, error) {
 func (s *scheduler) shouldRun() bool {
 	now := time.Now()
 	currentTime := time.Date(0, 1, 1, now.Hour(), now.Minute(), now.Second(), 0, time.UTC)
+	log.Printf("current time: %s, last run: %s, interval: %d seconds", currentTime.Format("15:04"), s.lastRun.Format("15:04"), s.interval)
 
 	if currentTime.Before(s.startTime) || currentTime.After(s.endTime) {
 		if s.lastRun.IsZero() || time.Since(s.lastRun) >= time.Duration(s.interval)*time.Second {
@@ -50,10 +51,11 @@ func (s *scheduler) shouldRun() bool {
 
 func (s *scheduler) sleepTime() time.Duration {
 	now := time.Now()
-	var sleepDuration time.Duration
 	currentTime := time.Date(0, 1, 1, now.Hour(), now.Minute(), now.Second(), 0, time.UTC)
+
+	var sleepDuration time.Duration
 	if currentTime.After(s.startTime) && currentTime.Before(s.endTime) {
-		sleepDuration = time.Until(s.endTime)
+		sleepDuration = s.endTime.Sub(currentTime)
 	}
 	nextRun := s.lastRun.Add(time.Duration(s.interval) * time.Second)
 	sleepDuration2 := time.Until(nextRun)
@@ -66,6 +68,7 @@ func (s *scheduler) sleepTime() time.Duration {
 func (s *scheduler) Run(f func() error) error {
 	for {
 		if s.shouldRun() {
+			log.Printf("running scheduled function...")
 			startTime := time.Now()
 			if err := f(); err != nil {
 				log.Printf("error running scheduled function: %v", err)
