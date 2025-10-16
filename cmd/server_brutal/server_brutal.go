@@ -84,7 +84,8 @@ func main() {
 func process(server *server) {
 	config := server.ServerConfig
 	start := time.Now()
-	common.LogSeparator("updating source code...")
+	common.LogSeparator("updating and cleaning source code...")
+	cleanGit(config)
 	updateGit(config)
 
 	common.LogSeparator("running bazel build --nobuild...")
@@ -108,6 +109,33 @@ func process(server *server) {
 	end := time.Now()
 	common.LogSeparator("summary")
 	log.Printf("Time taken: %s", end.Sub(start))
+}
+
+func cleanGit(config *common.ServerConfig) error {
+	l := common.NewLoggerWithPrefixAndColor("git: ")
+	// Example function to update git repository
+	gitDir := path.Join(config.Server.Workdir, "src")
+	log.Println("Pruning git repository at:", gitDir)
+
+	git := git.GitRunner{
+		RepoPath: gitDir,
+	}
+
+	retryCnt := 2
+	var err error
+	for i := 0; i < retryCnt; i++ {
+		log.Printf("Attempt #%d to prune repository...", i+1)
+
+		err = git.PruneRepository()
+		if err != nil {
+			l.Printf("Failed to prune repository: %v", err)
+		} else {
+			l.Printf("Repository pruned successfully after %d attempts", i+1)
+			break
+		}
+	}
+
+	return nil
 }
 
 func updateGit(config *common.ServerConfig) error {

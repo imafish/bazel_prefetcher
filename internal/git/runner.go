@@ -10,6 +10,7 @@ type GitRunner struct {
 	RepoPath string
 }
 type GitRunnerInterface interface {
+	PruneRepository() error
 	ResetRepository() error
 	UpdateRepository() error
 }
@@ -19,6 +20,19 @@ func (gr *GitRunner) ResetRepository() error {
 	cmd := exec.Command("git", "-C", gr.RepoPath, "reset", "--hard", "origin/master")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("failed to reset repository: %s, %v", string(output), err)
+	}
+	return nil
+}
+
+// PruneRepository runs `git gc --prune` on repository and submodules
+func (gr *GitRunner) PruneRepository() error {
+	cmd := exec.Command("git", "-C", gr.RepoPath, "gc", "--prune")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("failed to prune repository: %s, %v", string(output), err)
+	}
+	cmd = exec.Command("git", "-C", gr.RepoPath, "submodule", "foreach", "git", "gc", "--prune")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("failed to prune submodules: %s, %v", string(output), err)
 	}
 	return nil
 }
