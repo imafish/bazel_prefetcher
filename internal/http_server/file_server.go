@@ -51,6 +51,7 @@ func serveFiles(config *common.ServerConfig) func(http.ResponseWriter, *http.Req
 			return
 		}
 		defer file.Close()
+
 		http.ServeContent(w, r, filepath.Base(fullPath), fileInfo.ModTime(), file)
 	}
 }

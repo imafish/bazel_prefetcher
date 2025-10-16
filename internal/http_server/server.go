@@ -43,9 +43,9 @@ func (b *HttpServerBuilder) Build() *http.Server {
 	return &http.Server{
 		Addr:           fmt.Sprintf(":%d", b.config.Server.Port),
 		Handler:        b.serveMux,
-		IdleTimeout:    10 * time.Second, // b.config.Server.IdleTimeout,
-		ReadTimeout:    10 * time.Second, // b.config.Server.ReadTimeout,
-		WriteTimeout:   10 * time.Second, // b.config.Server.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,          // b.config.Server.MaxHeaderBytes,
+		IdleTimeout:    600 * time.Second, // b.config.Server.IdleTimeout,
+		ReadTimeout:    600 * time.Second, // b.config.Server.ReadTimeout,
+		WriteTimeout:   600 * time.Second, // b.config.Server.WriteTimeout,
+		MaxHeaderBytes: 1 << 20,           // b.config.Server.MaxHeaderBytes,
 	}
 }
